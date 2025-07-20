@@ -1,5 +1,5 @@
 {
-  "name": "Paysim",
+  "name": "Vaulty",
   "private": true,
   "scripts": {
     "build": "turbo run build",
