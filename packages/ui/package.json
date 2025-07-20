@@ -1,0 +1,31 @@
+{
+  "name": "@repo/ui",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./*": "./src/*.tsx",
+    "./button": "./src/button.tsx",
+    "./code": "./src/code.tsx",
+    "./appbar": "./src/Appbar.tsx",
+    "./center": "./src/Center.tsx",
+    "./select": "./src/Select.tsx",
+    "./textinput": "./src/TextInput.tsx",
+    "./Aa": "./src/Aa.tsx"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "generate:component": "turbo gen react-component",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@turbo/gen": "^2.5.0",
+    "@types/node": "^22.15.3",
+    "@types/eslint": "^8.56.5",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "19.1.1",
+    "eslint": "^9.28.0",
+    "typescript": "5.8.2"
+  }
+}

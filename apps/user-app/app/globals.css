@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@source "../../../node_modules/@repo/ui";
+
+
+.UniversalBackground{
+    background-image: linear-gradient(to right top, #a457b4, #9251b0, #7e4bac, #6a45a7, #5340a2, #4f3e9f, #4a3c9d, #463a9a, #553b9a, #613c99, #6d3d99, #773f98);
+}
