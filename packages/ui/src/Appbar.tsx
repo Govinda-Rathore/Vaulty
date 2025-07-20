@@ -19,7 +19,7 @@ export const Appbar = ({
     return <div className="flex justify-between border-b px-4">
         <div className=" flex items-center justify-center text-white text-2xl gap-2">
             <MdPayment/>
-            PaySim
+            Vaulty
         </div>
         <div className="flex flex-col justify-center pt-2">
             <Button onClick={user ? onSignout : onSignin}>{user ? "Logout" : "Login"}</Button>
