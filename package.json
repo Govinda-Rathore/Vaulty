@@ -1,5 +1,5 @@
 {
-  "name": "Vaulty",
+  "name": "vaulty",
   "private": true,
   "scripts": {
     "build": "turbo run build",
