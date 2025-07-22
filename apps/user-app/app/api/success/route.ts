@@ -9,20 +9,21 @@ export async function POST(req: NextRequest) {
     if (!amount || !provider) {
       return NextResponse.json(
         { success: false, message: "Missing amount or provider" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     await createOnRampTransaction(Number(amount), provider, "Recieved");
-    return NextResponse.json(
-      { success: true },
-      { status: 200 }
-    );
-  } catch (error: any) {
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error: unknown) {
     console.error("Error in /api/success:", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+
     return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
+      { success: false, message: errorMessage },
+      { status: 500 },
     );
   }
 }

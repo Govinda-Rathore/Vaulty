@@ -1,74 +1,88 @@
-import db from "@repo/db/client";
-import CredentialsProvider from "next-auth/providers/credentials"
-import { toast } from "react-toastify";
+import { NextAuthOptions, Session } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { JWT } from "next-auth/jwt";
 import bcrypt from "bcrypt";
-export const authOptions = {
-    providers: [
-      CredentialsProvider({
-          name: 'Credentials',
-          credentials: {
-            phone: { label: "Phone number", type: "text", placeholder: "1231231231", required: true },
-            password: { label: "Password", type: "password", required: true }
-          },
-          // TODO: User credentials type from next-auth
-          async authorize(credentials: any) {
-            // Do zod validation, OTP validation here
-            const hashedPassword = await bcrypt.hash(credentials.password, 10);
-            const existingUser = await db.user.findFirst({
-                where: {
-                    number: credentials.phone
-                }
-            });
+import db from "@repo/db/client";
 
-            if (existingUser) {
-                const passwordValidation = await bcrypt.compare(credentials.password, existingUser.password);
-                if (passwordValidation) {
-                    return {
-                        id: existingUser.id.toString(),
-                        name: existingUser.name,
-                        email: existingUser.number
-                    }
-                }
-                toast.success("LoggedIn");
-                return null;
-            }
+interface Credentials {
+  phone: string;
+  password: string;
+}
 
-            try {
-                const user = await db.user.create({
-                    data: {
-                        number: credentials.phone,
-                        password: hashedPassword
-                    }
-                });
-                await db.balance.create({
-                    data:{
-                        userId:user.id,
-                        amount:0,
-                        locked:0,
-                    }
-                })
-            
-                return {
-                    id: user.id.toString(),
-                    name: user.name,
-                    email: user.number
-                }
-            } catch(e) {
-                console.error(e);
-                toast.error("error Occurred");
-            }
+export const authOptions: NextAuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        phone: {
+          label: "Phone number",
+          type: "text",
+          placeholder: "1231231231",
+          required: true,
+        },
+        password: { label: "Password", type: "password", required: true },
+      },
+      async authorize(credentials: Credentials | undefined) {
+        if (!credentials) return null;
 
-            return null
-          },
-        })
-    ],
-    secret: process.env.JWT_SECRET || "secret",
-    callbacks: {
-        // TODO: can u fix the type here? Using any is bad
-        async session({ token, session }: any) {
-            session.user.id = token.sub
-            return session
+        const { phone, password } = credentials;
+
+        const existingUser = await db.user.findFirst({
+          where: { number: phone },
+        });
+
+        if (existingUser) {
+          const passwordValid = await bcrypt.compare(
+            password,
+            existingUser.password,
+          );
+
+          if (passwordValid) {
+            return {
+              id: existingUser.id.toString(),
+              name: existingUser.name,
+              email: existingUser.number,
+            };
+          }
+
+          return null;
         }
-    }
-  }
-  
+
+        // Create new user
+        const hashedPassword = await bcrypt.hash(password, 10);
+        try {
+          const user = await db.user.create({
+            data: {
+              number: phone,
+              password: hashedPassword,
+            },
+          });
+
+          await db.balance.create({
+            data: {
+              userId: user.id,
+              amount: 0,
+              locked: 0,
+            },
+          });
+
+          return {
+            id: user.id.toString(),
+            name: user.name,
+            email: user.number,
+          };
+        } catch (e) {
+          console.error(e);
+          return null;
+        }
+      },
+    }),
+  ],
+  secret: process.env.JWT_SECRET || "secret",
+  callbacks: {
+    async session({ token, session }: { token: JWT; session: Session }) {
+      session.user.id = token.sub!;
+      return session;
+    },
+  },
+};
